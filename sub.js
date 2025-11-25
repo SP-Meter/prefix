@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeTooltip = null;
 
   homeBtn.addEventListener("click", () => {
-    window.location.replace("main.html");
+    window.location.replace("index.html");
   });
 
   circles.forEach(circle => {
