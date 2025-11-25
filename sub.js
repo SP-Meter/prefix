@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeTooltip = null;
 
   homeBtn.addEventListener("click", () => {
-    window.location.href = "https://sp-meter.github.io/prefix/index.html";
+    window.location.href = "index.html";
   });
 
   circles.forEach(circle => {
