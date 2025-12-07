@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const expBox = document.querySelector(".exp");
   const resultContent = document.querySelector(".result-content");
   const resetBtn = document.querySelector(".reset");
-  const homeBtn = document.querySelector(".jub");
+  const dan = document.querySelector(".dan");
 
   let activeTooltip = null;
   let firstUnit = null;
@@ -11,42 +11,60 @@ document.addEventListener("DOMContentLoaded", () => {
   let firstUnitName = null;
 
   // 백엔드 API URL
-  const API_BASE_URL = "백엔드 API URL";
+  const API_BASE_URL = "http://localhost:3000";
 
-  // API id 매핑
+  // 단위 API id 매핑 (단위명 → API id)
   const unitIdMap = {
     "섭씨": "celsiusDegree",
     "화씨": "fahrenheitDegree",
     "인치": "inch",
     "피트": "foot",
     "미터": "meter",
-    "파운드": "pound",
-    "킬로그램": "kilogram",
+    "킬로미터": "kilometer",
     "마일": "mile",
-    "거리": "kilometer"
+    "그램": "gram",
+    "킬로그램": "kilogram",
+    "파운드": "pound",
+    "초": "second",
+    "분": "minute",
+    "시간": "hour"
   };
 
-  // 단위 설명 API
-  async function getUnitInfo(unitId) {
-    const response = await fetch(`${API_BASE_URL}/${unitId}`);
-    if (!response.ok) throw new Error("API 요청 실패");
-    return await response.json();
-  }
-
-  // 단위 변환 API
-  async function convertUnit(fromId, toId, value) {
-    const url = `${API_BASE_URL}/u/result?f=${fromId}&t=${toId}&v=${value}`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("변환 API 요청 실패");
-    return await response.json();
-  }
-
-  // 홈 버튼
-  homeBtn.addEventListener("click", () => {
-    window.location.replace("main.html");
+  // sub.html 이동
+  dan.addEventListener("click", () => {
+    window.location.replace("sub.html");
   });
 
-  // 원 요소 반복
+  // ⭐ 단위 설명 API
+  async function getUnitInfo(unitName) {
+    const id = unitIdMap[unitName];
+    if (!id) throw new Error("해당 단위 ID 없음");
+
+    const res = await fetch(`${API_BASE_URL}/${id}`);
+    if (!res.ok) throw new Error("단위 설명 API 오류");
+
+    return await res.json();
+  }
+
+  // ⭐ 단위 변환 API
+  async function convertUnit(fromName, toName, value) {
+    const fromId = unitIdMap[fromName];
+    const toId = unitIdMap[toName];
+
+    if (!fromId || !toId) throw new Error("단위 ID 매핑 오류");
+
+    const res = await fetch(
+      `${API_BASE_URL}/u/result?f=${fromId}&t=${toId}&v=${value}`
+    );
+
+    if (!res.ok) throw new Error("단위 변환 API 오류");
+
+    return await res.json();
+  }
+
+  // ==============================
+  //   메인 로직
+  // ==============================
   circles.forEach(circle => {
     const tooltip = circle.querySelector(".tooltip");
     const input = circle.querySelector(".tooltip-input");
@@ -54,11 +72,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const unitLabel = circle.querySelector(".circleAl");
 
     const unit = unitLabel?.textContent.trim() || "";
-    const unitName = circle.closest(".circleItem")
-      ?.querySelector(".circleName")
-      ?.textContent.trim() || "";
+    const circleItem = circle.closest(".circleItem");
+    const unitName = circleItem?.querySelector(".circleName")?.textContent.trim() || "";
 
-    // 첫 번째 값 입력 (tooltip 버튼 클릭)
+    // ⭐ 첫 번째 값 입력 시
     button?.addEventListener("click", async () => {
       const value = input.value.trim();
       if (!value) return;
@@ -70,21 +87,20 @@ document.addEventListener("DOMContentLoaded", () => {
       tooltip.classList.remove("active");
       activeTooltip = null;
 
-      const unitId = unitIdMap[firstUnitName];
-      if (!unitId) {
+      if (!unitIdMap[firstUnitName]) {
         expBox.innerHTML = `<div>해당 단위 설명 데이터가 없습니다.</div>`;
         return;
       }
 
       try {
-        const data = await getUnitInfo(unitId);
+        const data = await getUnitInfo(firstUnitName);
 
         expBox.innerHTML = `
           <div style="padding:20px; font-size:20px;">
             <h2><b>${data.name}</b> 단위 설명</h2>
             <div style="margin-top:10px; font-size:18px;">
               <b>기호:</b> ${data.symbol}<br>
-              <b>차원:</b> ${data.dimension}<br><br>
+              <b>배율:</b> ${data.magnification}<br><br>
               <div style="white-space:pre-line;">${data.desc}</div>
             </div>
           </div>
@@ -95,11 +111,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // 두 번째 클릭 → 변환 요청
+    // ⭐ 두 번째 단위 클릭 → 변환 실행
     circle.addEventListener("click", async (e) => {
       e.stopPropagation();
 
-      // 첫 클릭 전 → tooltip 열기
       if (!firstUnit) {
         if (activeTooltip && activeTooltip !== tooltip) {
           activeTooltip.classList.remove("active");
@@ -110,44 +125,38 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // 같은 원 클릭 무시
       if (unit === firstUnit) return;
 
-      // ID 매핑
-      const fromId = unitIdMap[firstUnitName];
-      const toId = unitIdMap[unitName];
+      const fromName = firstUnitName;
+      const toName = unitName;
 
-      if (!fromId || !toId) {
+      if (!unitIdMap[fromName] || !unitIdMap[toName]) {
         resultContent.innerHTML = `<div style="padding:20px;">해당 단위 변환 API가 없습니다.</div>`;
         return;
       }
 
       try {
-        // 백엔드 변환 요청
-        const data = await convertUnit(fromId, toId, firstValue);
+        const data = await convertUnit(fromName, toName, firstValue);
 
         resultContent.innerHTML = `
           <div style="padding:20px; font-size:20px;">
-            <b>${firstUnitName}</b> → <b>${unitName}</b> 변환 결과<br><br>
-
+            <b>${fromName}</b> → <b>${toName}</b> 변환 결과<br><br>
             <div style="font-size:22px; margin-bottom:10px;">
-              변환 결과 : <b>${data.result}</b>
+              결과: <b>${data.result}</b>
             </div>
-
-            <div style="white-space:pre-line; font-size:18px; line-height:1.5;">
-              변환 과정 :\n${data.formula}
+            <div style="white-space:pre-line; font-size:18px; line-height:1.6;">
+              ${data.formula}
             </div>
           </div>
         `;
 
-      } catch (e) {
+      } catch (err) {
         resultContent.innerHTML = `<div style="padding:20px;">변환 실패: 서버 오류</div>`;
       }
     });
-
   });
 
-  // 팝업 외부 클릭 → tooltip 닫기
+  // 팝업 외부 클릭 시 닫기
   document.addEventListener("click", (e) => {
     if (!e.target.closest(".tooltip") && !e.target.closest(".circle")) {
       if (activeTooltip) {
