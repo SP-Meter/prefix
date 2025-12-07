@@ -1,0 +1,384 @@
+import express from 'express'
+import cors from 'cors';
+
+const app = express();
+app.use(cors());
+const port = 3000;
+
+const prefixData: Record<string, any> = {
+    pico: {
+        id: `pico`,
+        name: '피코',
+        symbol: 'p',
+        magnification: 10 ** -12,
+        desc: '이탈리아어 "pico"(피코)는 "작은", "매우 작은" 이라는 의미를 가지고 있는데, 이에 어원을 두고 있다. ' +
+            '원자나 분자 수준에서 자주 사용되는 단위이다. ' +
+            '10의 -12승 의 크기를 표현하는 접두어이다. '
+    },
+    nano: {
+        id: `nano`,
+        name: '나노',
+        symbol: 'n',
+        magnification: 10 ** -9,
+        desc: '10의 -9승 의 크기를 표현하는 접두어이다. '
+    },
+    micro: {
+        id: `micro`,
+        name: '마이크로',
+        symbol: 'μ',
+        magnification: 10 ** -6,
+        desc: 'SI 단위 접두어중 유일하게 그리스 문자인 접두어이다. ' +
+            '권장되진 않지만, mc 로 표기하기도 하며, 무차원량에선 ppm 으로 표기가 바뀐다. ' +
+            '10의 -6승 의 크기를 표현하는 접두어이다. '
+    },
+    milli: {
+        id: `milli`,
+        name: '밀리',
+        symbol: 'm',
+        magnification: 10 ** -3,
+        desc: '1000 을 뜻하는 라틴어 mile 의 첫글자를 딴것이다. ' +
+            '10의 -3승 의 크기를 표현하는 접두어이다. '
+    },
+    centi: {
+        id: `centi`,
+        name: '센티',
+        symbol: 'c',
+        magnification: 10 ** -2,
+        desc: '100 을 뜻하는 라틴어 centum 의 앞글자를 딴것이다. ' +
+            '10의 -2승 의 크기를 표현하는 접두어이다. '
+    },
+    deci: {
+        id: `deci`,
+        name: '데시',
+        symbol: 'd',
+        magnification: 10 ** -1,
+        desc: '열번째를 뜻하는 라틴어 decimus 의 앞글자를 딴것이다.' +
+            '10분에 1의 크기를 표현하는 접두어이다. '
+    },
+
+    deca: {
+        id: `deca`,
+        name: '데카',
+        symbol: 'da',
+        magnification: 10 ** 1,
+        desc: '이름과 기호는 10을 뜻하는 고전 그리스어 에서 따온 것이다.' +
+            '10의 크기를 표현하는 접두어이다. '
+    },
+    hecto: {
+        id: `hecto`,
+        name: '헥토',
+        symbol: 'h',
+        magnification: 10 ** 2,
+        desc: '100을 뜻하는 고전 그리스어에서 이름을 따온 접두어이다. ' +
+            '10의 2승 의 크기를 표현하는 접두어이다. '
+    },
+    kilo: {
+        id: `kilo`,
+        name: '킬로',
+        symbol: 'k',
+        magnification: 10 ** 3,
+        desc: '1000을 뜻하는 고전 그리스어에서 이름을 따온 접두어이다. ' +
+            '10의 3승 의 크기를 표현하는 접두어이다. '
+    },
+    mega: {
+        id: `mega`,
+        name: '메가',
+        symbol: 'M',
+        magnification: 10 ** 6,
+        desc: '크다를 의미하는 고전 그리어에서 이름을 따온 접두어이다 ' +
+            '10의 6승 의 크기를 표현하는 접두어이다. '
+    },
+    giga: {
+        id: `giga`,
+        name: '기가',
+        symbol: 'G',
+        magnification: 10 ** 9,
+        desc: '거인을 뜻하는 고전 그리스에서 이름을 따온 접두어이다. ' +
+            '10의 9승 의 크기를 표현하는 접두어이다. '
+    },
+    tera: {
+        id: `tera`,
+        name: '테라',
+        symbol: 'T',
+        magnification: 10 ** 12,
+        desc: '괴물을 뜻하는 고전 그리스에어세 이름을 따온 접두어이다. ' +
+            '10의 12승 의 크기를 표현하는 접두어이다. '
+    }
+}
+
+const conversionRates: Record<string, number> = {
+    celsiusDegree: 0, // s
+    fahrenheitDegree: 0, // s
+    
+    // 미터 기준ㅓㅓㅓㅓㅓㅓj
+    inch: 0.0254,
+    ft: 0.3048,
+    meter: 1,
+    mile: 1609.344,
+    km: 1000,
+
+    // derive from kg
+    lb: 0.45359237,
+    kg: 1
+}
+
+const unitData: Record<string, any> = {
+    celsiusDegree: {
+        id: 'celsiusDegree',
+        name: `섭씨온도`,
+        dimension: 'temp',
+        symbol: `°C`,
+        desc: '물의 어는점과 끓는점을 100등분한 단위이다'
+    },
+    fahrenheitDegree: {
+        id: 'fahrenheitDegree',
+        name: '화씨온도',
+        dimension: 'temp',
+        symbol: `°F`,
+        desc: '미국, 미얀마, 벨리즈 등에서 주로 사용하는 온도 단위. ' +
+            '물의 어는점을 32도, 끓는점을 212도로 정의하고 그 사이를 180등분한 단위이다'
+    },
+
+    inch: {
+        id: 'inch',
+        name: `인치`,
+        dimension: 'length',
+        symbol: `inch`,
+        desc: '야드파운드법의 길이 단위중 하나이다. ' +
+            '명칭은 라틴어로 12분에 1을 뜻하는 운키아에서 유래하였다. ' +
+            '이름처런 상위 단위인 피트를 12등분한 단위이다'
+    },
+    ft: {
+        id: 'ft',
+        name: '피트',
+        dimension: 'length',
+        symbol: `ft`,
+        desc: '야드파운드법의 길이 단위중 하나이다. ' +
+            '야드의 1/3 크기이다 ' +
+            '피트라는 단위 이름은 과거 이 단위를 발의 크기로 정한데에서 유래되었다'
+    },
+    meter: {
+        id: 'meter',
+        name: '미터',
+        dimension: 'length',
+        symbol: `m`,
+        desc: '미터법에서 가장 기본이 되는 단위이다. ' +
+            '국가의 상관없이 산업계에선 거의 전역 표준으로써 쓰이는 단위이다. ' +
+            '현대에서 미터는 빛의 진행 거리를 통해 정의된다'
+    },
+
+    lb: {
+        id: 'lb',
+        name: '파운드',
+        dimension: 'mass',
+        symbol: `lb`,
+        desc: '야드파운드법의 질량 단위중 하나이다'
+    },
+    kg: {
+        id: 'kg',
+        name: '킬로그램',
+        dimension: 'mass',
+        symbol: `kg`,
+        desc: '질량의 국제단위계(SI) 기본 단위인 그램의 1000배이다. 현대에서는 플랑크 상수를 고정하여 정의한 단위이다'
+    },
+
+    mile: {
+        id: 'mile',
+        name: '마일',
+        dimension: 'length',
+        symbol: `mile`,
+        desc: '야드파운드법의 길이 단위중 하나이다. 고대 로마의 군대가 1000걸음을 기준으로 정한 거리에서 유래하였다'
+    },
+
+    km: {
+        id: 'km',
+        name: '킬로미터',
+        dimension: 'length',
+        symbol: `km`,
+        desc: '미터 단위의 1000배이다. 지리나 교통 분야에서 널리 사용되는 거리 단위이다'
+    },
+}
+
+function convertTemperature(value: number, fromUnit: string, toUnit: string): { result: number, formula: string } {
+    if (fromUnit === 'celsiusDegree' && toUnit === 'fahrenheitDegree') {
+        return {
+            result: (value * 9/5) + 32,
+            formula: '°F = (°C × 9/5) + 32'
+        }
+    } else if (fromUnit === 'fahrenheitDegree' && toUnit === 'celsiusDegree') {
+        return {
+            result: (value - 32) * 5/9,
+            formula: '°C = (°F - 32) × 5/9'
+        }
+    } else if (fromUnit === toUnit) {
+        return {
+            result: value,
+            formula: '동일한 단위'
+        }
+    }
+    
+    throw new Error('Invalid temperature conversion')
+}
+
+function convertUnit(value: number, fromUnit: string, toUnit: string): { result: number, formula: string } {
+    const fromRate = conversionRates[fromUnit]
+    const toRate = conversionRates[toUnit]
+    
+    if (fromRate === undefined || toRate === undefined) {
+        throw new Error('Unknown unit')
+    }
+    
+    const result = value * fromRate / toRate
+    const fromUnitObj = unitData[fromUnit]
+    const toUnitObj = unitData[toUnit]
+    
+    return {
+        result: result,
+        formula: `${fromUnitObj.symbol} → ${toUnitObj.symbol}: 값 × ${fromRate} ÷ ${toRate}`
+    }
+}
+
+app.get('/p/std', (req, res) => {
+    res.json(prefixData)
+})
+
+app.get('/p/info', (req, res) => {
+    const prefixId = req.query.t
+
+    if (!prefixId) {
+        res.status(400).json({
+            error: true,
+            message: 'Missing required parameter: t',
+        });
+        return;
+    }
+
+    res.json(prefixData[prefixId!.toString()])
+})
+
+app.get('/p/result', (req, res) => {
+    const startPrefixId = req.query.f
+    const destPrefixId = req.query.t
+    const rawValue = req.query.v
+
+    if (!startPrefixId || !destPrefixId || !rawValue) {
+        res.status(400).json({
+            error: true,
+            message: 'Missing required parameter',
+        });
+        return;
+    }
+
+    const value = parseFloat(rawValue!.toString())
+
+    const startPrefixData = prefixData[startPrefixId!.toString()]
+    const destPrefixData = prefixData[destPrefixId!.toString()]
+
+    if (!startPrefixData || !destPrefixData) {
+        res.status(404).json({
+            error: true,
+            message: 'Prefix not found',
+        });
+        return;
+    }
+
+    const result = value * startPrefixData.magnification / destPrefixData.magnification
+
+    res.json({
+        result: result,
+        formula: `${startPrefixData.symbol} → ${destPrefixData.symbol}: 값 × ${startPrefixData.magnification} ÷ ${destPrefixData.magnification}`
+    })
+})
+
+// unit endpo
+app.get('/u/std', (req, res) => {
+    res.json(unitData)
+})
+
+app.get('/u/info', (req, res) => {
+    const unitId = req.query.t
+
+    if (!unitId) {
+        res.status(400).json({
+            error: true,
+            message: 'Missing required parameter: t',
+        });
+        return;
+    }
+
+    const unit = unitData[unitId.toString()]
+
+    if (!unit) {
+        res.status(404).json({
+            error: true,
+            message: 'Unit not found',
+        });
+        return;
+    }
+
+    res.json(unit)
+})
+
+app.get('/u/result', (req, res) => {
+    const fromUnitId = req.query.f
+    const toUnitId = req.query.t
+    const rawValue = req.query.v
+
+    if (!fromUnitId || !toUnitId || !rawValue) {
+        res.status(400).json({
+            error: true,
+            message: 'Missing required parameter',
+        });
+        return;
+    }
+
+    const value = parseFloat(rawValue.toString())
+
+    if (isNaN(value)) {
+        res.status(400).json({
+            error: true,
+            message: 'Invalid value parameter',
+        });
+        return;
+    }
+
+    const fromUnit = unitData[fromUnitId.toString()]
+    const toUnit = unitData[toUnitId.toString()]
+
+    if (!fromUnit || !toUnit) {
+        res.status(404).json({
+            error: true,
+            message: 'Unit not found',
+        });
+        return;
+    }
+
+    if (fromUnit.dimension !== toUnit.dimension) {
+        res.status(400).json({
+            error: true,
+            message: 'Cannot convert between different dimensions',
+        });
+        return;
+    }
+
+    try {
+        let conversionResult: { result: number, formula: string }
+
+        if (fromUnit.dimension === 'temp') {
+            conversionResult = convertTemperature(value, fromUnitId.toString(), toUnitId.toString())
+        } else {
+            conversionResult = convertUnit(value, fromUnitId.toString(), toUnitId.toString())
+        }
+
+        res.json(conversionResult)
+    } catch (error) {
+        res.status(500).json({
+            error: true,
+            message: error instanceof Error ? error.message : 'Conversion failed',
+        });
+    }
+})
+
+app.listen(port, () => {
+    console.log(`포트:₩ ${port}`)
+})
