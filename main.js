@@ -36,15 +36,18 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   //설명 API
-  async function getUnitInfo(unitName) {
-    const id = unitIdMap[unitName.trim()];
-    if (!id) throw new Error("해당 접두어 ID 없음");
+  //설명 API
+async function getUnitInfo(unitName) {
+  const id = unitIdMap[unitName.trim()];
+  if (!id) throw new Error("해당 접두어 ID 없음");
 
-    const res = await fetch(`${API_BASE_URL}/${id}`);
-    if (!res.ok) throw new Error("접두어 설명 API 오류");
+  // 수정: 백엔드 URL에 쿼리 파라미터 추가
+  const res = await fetch(`${API_BASE_URL}/p/info?t=${id}`);
+  if (!res.ok) throw new Error("접두어 설명 API 오류");
 
-    return await res.json();
-  }
+  return await res.json();
+}
+
 
   //변환 API
   async function convertUnit(fromName, toName, value) {
