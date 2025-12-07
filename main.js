@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let firstUnitName = null;
 
   // 백엔드 API URL
-  const API_BASE_URL = "http://localhost:3000/p/info?t=pico";
+  const API_BASE_URL = "http://localhost:3000";
 
   // 단위 API id 매핑 (단위명 → API id)
   const unitIdMap = {
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ⭐ 단위 설명 API
   async function getUnitInfo(unitName) {
-    const id = unitIdMap[unitName];
+    const id = unitIdMap[unitName.trim()];
     if (!id) throw new Error("해당 단위 ID 없음");
 
     const res = await fetch(`${API_BASE_URL}/${id}`);
@@ -48,8 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ⭐ 단위 변환 API
   async function convertUnit(fromName, toName, value) {
-    const fromId = unitIdMap[fromName];
-    const toId = unitIdMap[toName];
+    const fromId = unitIdMap[fromName.trim()];
+    const toId = unitIdMap[toName.trim()];
 
     if (!fromId || !toId) throw new Error("단위 ID 매핑 오류");
 
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tooltip.classList.remove("active");
       activeTooltip = null;
 
-      if (!unitIdMap[firstUnitName]) {
+      if (!unitIdMap[firstUnitName.trim()]) {
         expBox.innerHTML = `<div>해당 단위 설명 데이터가 없습니다.</div>`;
         return;
       }
@@ -127,8 +127,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (unit === firstUnit) return;
 
-      const fromName = firstUnitName;
-      const toName = unitName;
+      let fromName = firstUnitName.trim();
+      let toName = unitName.trim();
+
+      // 디버깅용
+      console.log("fromName:", fromName, "toName:", toName);
+      console.log("unitIdMap keys:", Object.keys(unitIdMap));
 
       if (!unitIdMap[fromName] || !unitIdMap[toName]) {
         resultContent.innerHTML = `<div style="padding:20px;">해당 단위 변환 API가 없습니다.</div>`;
