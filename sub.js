@@ -34,10 +34,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // 홈 버튼
-  homeBtn.addEventListener("click", () => {
+  homeBtn.addEventListener("click", (e) => {
+    e.preventDefault(); // a 태그 기본 동작 막기
     window.location.replace("https://sp-meter.github.io/prefix/index.html");
-
   });
+
 
   // 원 요소 반복
   circles.forEach(circle => {
