@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 백엔드 API URL
   const API_BASE_URL = "http://localhost:3000";
 
-  // 단위 API id 매핑 (단위명 → API id)
+  // API id 매핑
   const unitIdMap = {
     "피코": "pico",
     "나노": "nano",
@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.replace("sub.html");
   });
 
-  // ⭐ 단위 설명 API
+  //설명 API
   async function getUnitInfo(unitName) {
     const id = unitIdMap[unitName.trim()];
     if (!id) throw new Error("해당 단위 ID 없음");
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return await res.json();
   }
 
-  // ⭐ 단위 변환 API
+  //변환 API
   async function convertUnit(fromName, toName, value) {
     const fromId = unitIdMap[fromName.trim()];
     const toId = unitIdMap[toName.trim()];
@@ -62,9 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return await res.json();
   }
 
-  // ==============================
   //   메인 로직
-  // ==============================
   circles.forEach(circle => {
     const tooltip = circle.querySelector(".tooltip");
     const input = circle.querySelector(".tooltip-input");
@@ -75,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const circleItem = circle.closest(".circleItem");
     const unitName = circleItem?.querySelector(".circleName")?.textContent.trim() || "";
 
-    // ⭐ 첫 번째 값 입력 시
+    // 첫 번째 값 입력 시
     button?.addEventListener("click", async () => {
       const value = input.value.trim();
       if (!value) return;
@@ -111,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // ⭐ 두 번째 단위 클릭 → 변환 실행
+    // 두 번째 단위 클릭 → 변환 실행
     circle.addEventListener("click", async (e) => {
       e.stopPropagation();
 
@@ -135,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("unitIdMap keys:", Object.keys(unitIdMap));
 
       if (!unitIdMap[fromName] || !unitIdMap[toName]) {
-        resultContent.innerHTML = `<div style="padding:20px;">해당 단위 변환 API가 없습니다.</div>`;
+        resultContent.innerHTML = `<div style="padding:20px;">해당 접두어 변환 API가 없습니다.</div>`;
         return;
       }
 
