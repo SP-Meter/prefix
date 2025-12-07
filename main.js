@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let firstUnitName = null;
 
   // 백엔드 API URL
-  const PREFIX_API_BASE_URL = "http://localhost:3000/p";
+  const PREFIX_API_BASE_URL = "http://seena.kro.kr:3000";
 
   // API id 매핑
   const unitIdMap = {
