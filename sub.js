@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let firstUnitName = null;
 
   // 단위 API URL
-  const API_BASE_URL = "http://localhost:3000/p/info?t=pico";
+  const API_BASE_URL = "http://localhost:3000/u";
 
   // 단위 ID 매핑
   const unitIdMap = {
@@ -33,16 +33,21 @@ document.addEventListener("DOMContentLoaded", () => {
     return await response.json();
   }
 
+  // 변환 요청
+  async function getConversion(fromUnitId, toUnitId, value) {
+    const response = await fetch(`${API_BASE_URL}/result?f=${fromUnitId}&t=${toUnitId}&v=${value}`);
+    if (!response.ok) throw new Error("변환 요청 실패");
+    return await response.json();
+  }
+
   // 홈 버튼
   homeBtn.addEventListener("click", (e) => {
-    e.preventDefault(); // a 태그 기본 동작 막기
+    e.preventDefault();
     window.location.replace("https://sp-meter.github.io/prefix/index.html");
   });
 
-
   // 원 요소 반복
   circles.forEach(circle => {
-
     const tooltip = circle.querySelector(".tooltip");
     const input = circle.querySelector(".tooltip-input");
     const button = circle.querySelector(".tooltip-btn");
@@ -77,9 +82,9 @@ document.addEventListener("DOMContentLoaded", () => {
           <div style="padding:20px; font-size:20px;">
             <h2><b>${data.name}</b> 단위 설명</h2>
             <div style="margin-top:10px; font-size:18px;">
-              <b>기호:</b> ${data.symbol}<br>
-              <b>차원:</b> ${data.dimension}<br><br>
-              <div style="white-space:pre-line;">${data.desc}</div>
+              <b>기호:</b> ${data.symbol || '-'}<br>
+              <b>차원:</b> ${data.dimension || '-'}<br><br>
+              <div style="white-space:pre-line;">${data.desc || '설명 없음'}</div>
             </div>
           </div>
         `;
@@ -88,11 +93,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // 원 클릭 (두 번째 선택)
+    // 두 번째 원 클릭 → 변환
     circle.addEventListener("click", async (e) => {
       e.stopPropagation();
 
-      // 첫 번째값 입력 전 → tooltip 열기
+      // 첫 번째 값 입력 전 → tooltip 열기
       if (!firstUnit) {
         if (activeTooltip && activeTooltip !== tooltip) {
           activeTooltip.classList.remove("active");
@@ -106,14 +111,18 @@ document.addEventListener("DOMContentLoaded", () => {
       // 같은 원 클릭 → 무시
       if (unit === firstUnit) return;
 
-      // 두 번째 클릭 → 변환 요청
+      // 숫자 체크
+      const numericValue = parseFloat(firstValue);
+      if (isNaN(numericValue)) {
+        resultContent.innerHTML = `<div>유효한 숫자를 입력해주세요.</div>`;
+        return;
+      }
+
       const fromUnitId = unitIdMap[firstUnitName];
       const toUnitId = unitIdMap[unitName];
 
       try {
-        const response = await fetch(`${API_BASE_URL}/result?f=${fromUnitId}&t=${toUnitId}&v=${firstValue}`);
-        if (!response.ok) throw new Error("변환 요청 실패");
-        const conversion = await response.json();
+        const conversion = await getConversion(fromUnitId, toUnitId, numericValue);
 
         resultContent.innerHTML = `
           <div style="padding:20px; font-size:20px;">
@@ -128,7 +137,6 @@ document.addEventListener("DOMContentLoaded", () => {
         resultContent.innerHTML = `<div>변환 중 오류 발생: ${error.message}</div>`;
       }
     });
-
   });
 
   // 팝업 외부 클릭 → tooltip 닫기
