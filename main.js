@@ -57,7 +57,7 @@ async function getUnitInfo(unitName) {
     if (!fromId || !toId) throw new Error("접두어 ID 매핑 오류");
 
     const res = await fetch(
-      `${API_BASE_URL}/u/result?f=${fromId}&t=${toId}&v=${value}`
+      `${API_BASE_URL}/p/result?f=${fromId}&t=${toId}&v=${value}`
     );
 
     if (!res.ok) throw new Error("접두어 변환 API 오류");
