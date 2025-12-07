@@ -35,7 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 홈 버튼
   homeBtn.addEventListener("click", () => {
-    window.location.replace("main.html");
+    window.location.replace("/Prefix/main.html");
+
   });
 
   // 원 요소 반복
