@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
       activeTooltip = null;
 
       if (!unitIdMap[firstUnitName.trim()]) {
-        expBox.innerHTML = `<div>해당 단위 설명 데이터가 없습니다.</div>`;
+        expBox.innerHTML = `<div>해당 접두어 설명 데이터가 없습니다.</div>`;
         return;
       }
 
