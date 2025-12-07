@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let firstUnitName = null;
 
   // 단위 API URL
-  const API_BASE_URL = "http://localhost:3000/u";
+  const API_BASE_URL = "http://seena.kro.kr:3000";
 
   // 단위 ID 매핑
   const unitIdMap = {
