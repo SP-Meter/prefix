@@ -38,10 +38,10 @@ document.addEventListener("DOMContentLoaded", () => {
   //설명 API
   async function getUnitInfo(unitName) {
     const id = unitIdMap[unitName.trim()];
-    if (!id) throw new Error("해당 단위 ID 없음");
+    if (!id) throw new Error("해당 접두어 ID 없음");
 
     const res = await fetch(`${API_BASE_URL}/${id}`);
-    if (!res.ok) throw new Error("단위 설명 API 오류");
+    if (!res.ok) throw new Error("접두어 설명 API 오류");
 
     return await res.json();
   }
@@ -51,13 +51,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const fromId = unitIdMap[fromName.trim()];
     const toId = unitIdMap[toName.trim()];
 
-    if (!fromId || !toId) throw new Error("단위 ID 매핑 오류");
+    if (!fromId || !toId) throw new Error("접두어 ID 매핑 오류");
 
     const res = await fetch(
       `${API_BASE_URL}/u/result?f=${fromId}&t=${toId}&v=${value}`
     );
 
-    if (!res.ok) throw new Error("단위 변환 API 오류");
+    if (!res.ok) throw new Error("접두어 변환 API 오류");
 
     return await res.json();
   }
