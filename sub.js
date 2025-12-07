@@ -10,10 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let firstValue = null;
   let firstUnitName = null;
 
-  // 백엔드 API URL
-  const API_BASE_URL = "백엔드 API URL";
+  const API_BASE_URL = "http://localhost:3000/unit";
 
-  // API id 매핑
   const unitIdMap = {
     "섭씨": "celsiusDegree",
     "화씨": "fahrenheitDegree",
@@ -26,33 +24,25 @@ document.addEventListener("DOMContentLoaded", () => {
     "거리": "kilometer"
   };
 
-  // 단위 설명 API
   async function getUnitInfo(unitId) {
     const response = await fetch(`${API_BASE_URL}/${unitId}`);
-    if (!response.ok) {
-      throw new Error("API 요청 실패");
-    }
+    if (!response.ok) throw new Error("API 요청 실패");
     return await response.json();
   }
 
-  // ⭐ 단위 변환 API
   async function convertUnit(fromId, toId, value) {
-    const response = await fetch(
-      `${API_BASE_URL}/u/result?f=${fromId}&t=${toId}&v=${value}`
-    );
-    if (!response.ok) {
-      throw new Error("단위 변환 API 요청 실패");
-    }
+    const url = `${API_BASE_URL}/convert?f=${fromId}&t=${toId}&v=${value}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("변환 API 요청 실패");
     return await response.json();
   }
 
-  // 홈 버튼
+  // ⭐ 단위 버튼 → 단위 페이지 이동 (절대 삭제 X)
   homeBtn.addEventListener("click", () => {
     window.location.replace("main.html");
   });
 
   circles.forEach(circle => {
-
     const tooltip = circle.querySelector(".tooltip");
     const input = circle.querySelector(".tooltip-input");
     const button = circle.querySelector(".tooltip-btn");
@@ -63,9 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ?.querySelector(".circleName")
       ?.textContent.trim() || "";
 
-    // -------------------------------------
     // 1) 첫 번째 입력 → 설명 API
-    // -------------------------------------
     button?.addEventListener("click", async () => {
       const value = input.value.trim();
       if (!value) return;
@@ -78,7 +66,6 @@ document.addEventListener("DOMContentLoaded", () => {
       activeTooltip = null;
 
       const unitId = unitIdMap[firstUnitName];
-
       if (!unitId) {
         expBox.innerHTML = `<div>해당 단위 설명 데이터가 없습니다.</div>`;
         return;
@@ -101,9 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // -------------------------------------
-    // 2) 두 번째 클릭 → 변환 API 호출 ⭐
-    // -------------------------------------
+    // 2) 두 번째 클릭 → 변환 API
     circle.addEventListener("click", async (e) => {
       e.stopPropagation();
 
@@ -130,7 +115,6 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const data = await convertUnit(fromId, toId, firstValue);
 
-        // ⭐ 여기에 "변환 결과 :" / "변환 과정 :" 추가됨
         resultContent.innerHTML = `
           <div style="padding:20px; font-size:20px;">
             <b>${firstUnitName}</b> → <b>${unitName}</b> 변환 결과<br><br>
@@ -144,15 +128,12 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           </div>
         `;
-
-      } catch (error) {
+      } catch (e) {
         resultContent.innerHTML = `<div style="padding:20px;">변환 실패: 서버 오류</div>`;
       }
     });
-
   });
 
-  // tooltip 외부 클릭 시 닫기
   document.addEventListener("click", (e) => {
     if (!e.target.closest(".tooltip") && !e.target.closest(".circle")) {
       if (activeTooltip) {
@@ -162,7 +143,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 초기화
   resetBtn.addEventListener("click", () => {
     firstUnit = null;
     firstValue = null;
@@ -171,8 +151,8 @@ document.addEventListener("DOMContentLoaded", () => {
     expBox.innerHTML = "";
     resultContent.innerHTML = "";
 
-    circles.forEach(circle => {
-      const input = circle.querySelector(".tooltip-input");
+    circles.forEach(c => {
+      const input = c.querySelector(".tooltip-input");
       if (input) input.value = "";
     });
   });
