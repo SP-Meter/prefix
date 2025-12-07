@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let firstUnitName = null;
 
   // 백엔드 API URL
-  const API_BASE_URL = "http://localhost:3000";
+  const API_BASE_URL = "http://localhost:3000/p";
 
   // API id 매핑
   const unitIdMap = {
