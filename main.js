@@ -15,20 +15,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 단위 API id 매핑 (단위명 → API id)
   const unitIdMap = {
-    "섭씨": "celsiusDegree",
-    "화씨": "fahrenheitDegree",
-    "인치": "inch",
-    "피트": "foot",
-    "미터": "meter",
-    "킬로미터": "kilometer",
-    "마일": "mile",
-    "그램": "gram",
-    "킬로그램": "kilogram",
-    "파운드": "pound",
-    "초": "second",
-    "분": "minute",
-    "시간": "hour"
-  };
+    "피코": "pico",
+    "나노": "nano",
+    "마이크로": "micro",
+    "밀리": "milli",
+    "센티": "centi",
+    "데시": "deci",
+    "데카": "deca",
+    "헥토": "hecto",
+    "킬로": "kilo",
+    "메가": "mega",
+    "기가": "giga",
+    "테라": "tera"
+};
+
 
   // sub.html 이동
   dan.addEventListener("click", () => {
