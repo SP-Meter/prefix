@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 홈 버튼
   homeBtn.addEventListener("click", () => {
-    window.location.replace("/Prefix/main.html");
+    window.location.replace("/prefix/main.html");
 
   });
 
