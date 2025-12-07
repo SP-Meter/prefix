@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let firstUnitName = null;
 
   // 백엔드 API URL
-  const API_BASE_URL = "http://localhost:3000/p";
+  const PREFIX_API_BASE_URL = "http://localhost:3000/p";
 
   // API id 매핑
   const unitIdMap = {
@@ -36,34 +36,32 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   //설명 API
-  //설명 API
-async function getUnitInfo(unitName) {
+async function getPrefixInfo(unitName) {
   const id = unitIdMap[unitName.trim()];
   if (!id) throw new Error("해당 접두어 ID 없음");
 
   // 수정: 백엔드 URL에 쿼리 파라미터 추가
-  const res = await fetch(`${API_BASE_URL}/p/info?t=${id}`);
+  const res = await fetch(`${PREFIX_API_BASE_URL}/info?t=${id}`);
   if (!res.ok) throw new Error("접두어 설명 API 오류");
 
   return await res.json();
 }
 
-
   //변환 API
-  async function convertUnit(fromName, toName, value) {
-    const fromId = unitIdMap[fromName.trim()];
-    const toId = unitIdMap[toName.trim()];
+  async function convertPrefix(fromName, toName, value) {
+  const fromId = unitIdMap[fromName.trim()];
+  const toId = unitIdMap[toName.trim()];
 
-    if (!fromId || !toId) throw new Error("접두어 ID 매핑 오류");
+  if (!fromId || !toId) throw new Error("접두어 ID 매핑 오류");
 
-    const res = await fetch(
-      `${API_BASE_URL}/p/result?f=${fromId}&t=${toId}&v=${value}`
-    );
+  const res = await fetch(
+    `${PREFIX_API_BASE_URL}/result?f=${fromId}&t=${toId}&v=${value}`
+  );
+  if (!res.ok) throw new Error("접두어 변환 API 오류");
 
-    if (!res.ok) throw new Error("접두어 변환 API 오류");
+  return await res.json();
+}
 
-    return await res.json();
-  }
 
   //   메인 로직
   circles.forEach(circle => {
@@ -94,7 +92,7 @@ async function getUnitInfo(unitName) {
       }
 
       try {
-        const data = await getUnitInfo(firstUnitName);
+        const data = await getPrefixInfo(firstUnitName);
 
         expBox.innerHTML = `
           <div style="padding:20px; font-size:20px;">
@@ -141,7 +139,7 @@ async function getUnitInfo(unitName) {
       }
 
       try {
-        const data = await convertUnit(fromName, toName, firstValue);
+        const data = await convertPrefix(fromName, toName, firstValue);
 
         resultContent.innerHTML = `
           <div style="padding:20px; font-size:20px;">
